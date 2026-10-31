@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-night: #0b0b1e;
+  --color-night-soft: #12122b;
+  --color-surface: #171734;
+  --color-line: #2a2a52;
+  --color-ember: #ff922e;
+  --color-ember-soft: #ffb067;
+  --color-lilac: #b9a5e8;
+  --color-cream: #f5f1e8;
+  --color-muted: #9a96b8;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+body {
+  background: var(--color-night);
+  color: var(--color-cream);
+}
+
+::selection {
+  background: rgba(255, 146, 46, 0.35);
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  42% { opacity: 0.85; }
+  58% { opacity: 0.95; }
+  74% { opacity: 0.8; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.25; }
+}
+
+@keyframes rise {
+  from { transform: translateY(6px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-flicker { animation: flicker 3.2s ease-in-out infinite; }
+.animate-twinkle { animation: twinkle 4s ease-in-out infinite; }
+.animate-rise { animation: rise 0.45s ease-out both; }
+
+*:focus-visible {
+  outline: 2px solid var(--color-ember);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flicker, .animate-twinkle, .animate-rise { animation: none; }
+}

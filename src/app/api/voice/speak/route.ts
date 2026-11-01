@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { synthesizeSpeech } from "@/lib/voice";
 
-export const runtime = "nodejs";
-
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as { text?: string } | null;
   const text = body?.text?.trim();

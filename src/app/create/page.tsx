@@ -7,9 +7,8 @@ import { Flame, KeyRound, Plus, Check, Copy } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { FieldError, Input, Label, Select, Textarea } from "@/components/ui/Input";
+import { FieldError, Input, Label } from "@/components/ui/Input";
 import { getSupabase, getParticipantToken } from "@/lib/supabase-client";
-import { ACTIVITY_TYPES, SESSION_TYPES } from "@/lib/activities";
 import { generateRoomCode } from "@/lib/utils";
 import type { Room } from "@/lib/types";
 
@@ -19,9 +18,6 @@ function CreateJoinInner() {
   const [mode, setMode] = useState<"create" | "join">("create");
   const [name, setName] = useState("");
   const [roomName, setRoomName] = useState("");
-  const [activity, setActivity] = useState("focus");
-  const [sessionType, setSessionType] = useState("pomodoro");
-  const [description, setDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -52,7 +48,6 @@ function CreateJoinInner() {
       localStorage.setItem("campfire_name", name.trim());
 
       let room: Room | null = null;
-      const minutes = SESSION_TYPES.find((s) => s.key === sessionType)?.minutes ?? 25;
       for (let attempt = 0; attempt < 5; attempt++) {
         const code = generateRoomCode();
         const { data, error } = await supabase
@@ -60,11 +55,8 @@ function CreateJoinInner() {
           .insert({
             code,
             name: roomName.trim(),
-            activity_type: activity,
-            session_type: sessionType,
-            description: description.trim(),
             host_token: token,
-            duration_sec: minutes * 60,
+            duration_sec: 900,
           })
           .select()
           .single();
@@ -179,26 +171,6 @@ function CreateJoinInner() {
                 <Input id="room-name" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="e.g. Midnight Manuscripts" maxLength={50} />
                 <FieldError>{errors.roomName}</FieldError>
               </div>
-              <div>
-                <Label htmlFor="activity">Activity type</Label>
-                <Select id="activity" value={activity} onChange={(e) => setActivity(e.target.value)}>
-                  {ACTIVITY_TYPES.map((a) => (
-                    <option key={a.key} value={a.key}>{a.label} — {a.blurb}</option>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="session">Session length</Label>
-                <Select id="session" value={sessionType} onChange={(e) => setSessionType(e.target.value)}>
-                  {SESSION_TYPES.map((s) => (
-                    <option key={s.key} value={s.key}>{s.label}</option>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="desc">Description (optional)</Label>
-                <Textarea id="desc" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What are you working on?" maxLength={200} />
-              </div>
               <FieldError>{errors.form}</FieldError>
               <Button type="submit" disabled={busy} size="lg">
                 {busy ? "Lighting the fire…" : "Create room"}
@@ -206,7 +178,7 @@ function CreateJoinInner() {
             </form>
           ) : (
             <p className="text-sm text-muted">
-              Open a fresh campfire, pick the activity and length, and share the code with your circle.
+              Start an Idea Clash room and share the code with your circle.
             </p>
           )}
         </Card>

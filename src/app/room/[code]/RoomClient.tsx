@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/Card";
 import { FieldError, Input } from "@/components/ui/Input";
 import { getSupabase, getParticipantToken } from "@/lib/supabase-client";
 import { setServerOffset, remainingSeconds } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/Skeleton";
 import type {
   Challenge,
   ChatMessage,
@@ -119,11 +120,13 @@ export function RoomClient({ code }: { code: string }) {
     const roomId = room.id;
 
     const loadAll = async () => {
-      const [parts, msgs, chs] = await Promise.all([
+      const [roomRes, parts, msgs, chs] = await Promise.all([
+        supabase.from("rooms").select("*").eq("id", roomId).maybeSingle(),
         supabase.from("participants").select("*").eq("room_id", roomId).order("created_at"),
         supabase.from("chat_messages").select("*").eq("room_id", roomId).order("created_at").limit(200),
         supabase.from("challenges").select("*").eq("room_id", roomId).order("created_at"),
       ]);
+      if (roomRes.data) applyRoom(roomRes.data as Room);
       setParticipants((parts.data ?? []) as Participant[]);
       setMessages((msgs.data ?? []) as ChatMessage[]);
       const chsList = (chs.data ?? []) as Challenge[];
@@ -173,10 +176,27 @@ export function RoomClient({ code }: { code: string }) {
           setChallenge((prev) => (prev && prev.id === row.id ? { ...prev, ...row } : prev));
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          void supabase.channel(`room-${roomId}`).subscribe();
+        }
+      });
+
+    const resync = () => {
+      if (document.visibilityState !== "visible") return;
+      void loadAll();
+      const ch = supabase.getChannels().find((c) => c.topic === `room-${roomId}`);
+      if (ch && ch.state !== "joined") void ch.subscribe();
+    };
+    document.addEventListener("visibilitychange", resync);
+    window.addEventListener("focus", resync);
+    window.addEventListener("online", resync);
 
     return () => {
       void supabase.removeChannel(roomChannel);
+      document.removeEventListener("visibilitychange", resync);
+      window.removeEventListener("focus", resync);
+      window.removeEventListener("online", resync);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, room?.id]);
@@ -259,7 +279,21 @@ export function RoomClient({ code }: { code: string }) {
   }, [phase, room]);
 
   if (phase === "joining") {
-    return <CenterMessage text="Finding the fire…" />;
+    return (
+      <div className="flex min-h-screen items-center justify-center p-5">
+        <Card className="w-full max-w-sm">
+          <div className="flex flex-col items-center gap-4">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <div className="flex w-full flex-col items-center gap-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+            <Skeleton className="h-9 w-full" />
+            <p className="text-xs text-muted">Finding the fire…</p>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   if (phase === "naming") {
@@ -454,14 +488,6 @@ export function RoomClient({ code }: { code: string }) {
 
         <FieldError>{error}</FieldError>
       </main>
-    </div>
-  );
-}
-
-function CenterMessage({ text }: { text: string }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center text-sm text-muted">
-      {text}
     </div>
   );
 }

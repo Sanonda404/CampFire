@@ -80,7 +80,11 @@ export function ChallengePanel(p: Props) {
       <div>
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-ember">
           <Sparkles className="h-4 w-4" aria-hidden /> Shared Spark
-          {p.challenge.ai_generated && <span className="text-muted/70 normal-case">· AI-kindled</span>}
+          {p.challenge.ai_generated ? (
+            <span className="text-muted/70 normal-case">· AI-kindled</span>
+          ) : (
+            <span className="text-muted/70 normal-case">· from the campfire deck (AI unavailable)</span>
+          )}
         </p>
         <h2 className="mt-2 text-lg font-bold leading-snug">{p.challenge.question}</h2>
         {p.challenge.context && <p className="mt-1.5 text-sm text-muted">{p.challenge.context}</p>}
@@ -143,7 +147,7 @@ export function ChallengePanel(p: Props) {
           {p.submissions.length === 0 && (
             <p className="text-sm text-muted">              Nobody sealed an answer this time.</p>
           )}
-          <ul className="flex flex-col gap-2">
+          <ul className="scroll-thin -mr-1 flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
             {p.submissions.map((s) => (
               <li key={s.id} className="flex gap-3 rounded-xl border border-line bg-night-soft p-3">
                 <Avatar token={s.participant_token} name={nameByToken.get(s.participant_token) ?? "?"} size="sm" />

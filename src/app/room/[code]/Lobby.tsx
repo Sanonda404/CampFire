@@ -39,7 +39,7 @@ export function Lobby({
       <div className="text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-ember">Idea Clash</p>
         <h1 className="mt-1 text-2xl font-extrabold tracking-tight">{room.name}</h1>
-        <p className="mt-1 font-mono text-sm text-muted">Room {room.code}</p>
+        <p className="mt-1 font-mono text-sm text-muted">Room Code: {room.code}</p>
       </div>
 
       <div className="rounded-xl border border-line bg-night-soft p-3 text-center text-sm">

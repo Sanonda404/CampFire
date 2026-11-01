@@ -22,9 +22,9 @@ export function ScratchPages({
   const active = pages.find((p) => p.id === selectedId) ?? pages[0] ?? null;
 
   return (
-    <Card className="flex min-h-0 flex-col gap-3 p-4">
+    <Card className="flex min-h-0 flex-col gap-4 rounded-2xl border border-line bg-surface/70 p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Scratch pages</h2>
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">Scratch pages</h2>
         <button
           type="button"
           onClick={() => void onCreate().then((id) => id && setSelectedId(id))}
@@ -123,7 +123,7 @@ function PageEditor({
       <textarea
         value={contentDraft}
         onChange={(e) => setContentDraft(e.target.value)}
-        rows={8}
+        rows={10}
         maxLength={8000}
         placeholder="Notes, risks, half-formed thoughts — visible to your whole team."
         className="w-full flex-1 resize-none rounded-xl border border-line bg-night-soft p-3 text-sm text-cream placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-ember/60"

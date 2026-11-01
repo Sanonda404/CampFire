@@ -40,13 +40,13 @@ export function Sidebar({
   }
 
   return (
-    <aside className="flex w-full flex-col gap-5 border-line/60 bg-night-soft/70 p-5 md:h-screen md:w-72 md:border-r md:sticky md:top-0">
-      <Link href="/" className="flex items-center gap-2 font-bold tracking-tight">
-        <Flame className="h-5 w-5 text-ember" aria-hidden /> Campfire
+    <aside className="relative flex w-full shrink-0 flex-col gap-5 border-b border-line bg-night-soft/90 p-4 sm:p-5 md:sticky md:top-0 md:h-screen md:w-72 md:overflow-y-auto md:border-b-0 md:border-r md:p-6">
+      <Link href="/" className="flex items-center gap-2.5 font-bold tracking-tight">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-ember/25 bg-ember/10"><Flame className="h-5 w-5 text-ember" aria-hidden /></span><span className="text-base">Campfire<span className="ml-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">workspace</span></span>
       </Link>
 
       <div>
-        <h1 className="text-lg font-bold leading-snug">{room.name}</h1>
+        <h1 className="text-xl font-extrabold leading-snug tracking-tight">{room.name}</h1>
         <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
           <Activity className="h-3.5 w-3.5 text-lilac" aria-hidden />
           {activityLabel(room.activity_type)} · {Math.round(room.duration_sec / 60)} min
@@ -54,7 +54,7 @@ export function Sidebar({
         {room.description && <p className="mt-2 text-xs leading-relaxed text-muted">{room.description}</p>}
       </div>
 
-      <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2">
+      <div className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-3 shadow-sm">
         <span className="font-mono text-sm font-bold tracking-[0.2em] text-ember">{room.code}</span>
         <button
           onClick={copyInvite}
@@ -67,10 +67,10 @@ export function Sidebar({
       </div>
 
       <div>
-        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted">
+        <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
           <Users className="h-3.5 w-3.5" aria-hidden /> Around the fire ({participants.length})
         </p>
-        <ul className="scroll-thin -mr-1 flex max-h-56 flex-col gap-2 overflow-y-auto pr-1">
+        <ul className="scroll-thin -mr-1 flex max-h-56 flex-col gap-3 overflow-y-auto pr-1">
           {participants.map((p) => {
             const online = now > 0 && now - new Date(p.last_seen_at).getTime() < 70_000;
             return (

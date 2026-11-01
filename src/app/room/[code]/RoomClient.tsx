@@ -411,7 +411,7 @@ export function RoomClient({ code }: { code: string }) {
   const recapReady = room.state === "complete";
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="min-h-screen bg-night text-cream md:flex">
       <Sidebar
         room={room}
         participants={participants}
@@ -419,11 +419,20 @@ export function RoomClient({ code }: { code: string }) {
         onLeave={() => router.push("/")}
       />
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <PhaseIndicator state={room.state} />
+      <main className="mx-auto flex min-w-0 w-full max-w-[1680px] flex-1 flex-col px-4 py-4 sm:px-6 sm:py-6 xl:px-8">
+        <header className="mb-5 flex flex-col gap-4 border-b border-line/80 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.45)]" />
+              Live room <span className="text-line">/</span> <span className="font-mono tracking-[0.16em]">{room.code}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">{room.name}</h1>
+              <PhaseIndicator state={room.state} />
+            </div>
+          </div>
           {isHost && (room.state === "focusing" || (room.started_at && !recapReady)) && (
-            <div className="flex gap-2">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
               {room.state === "focusing" && (
                 <Button size="sm" onClick={() => timerAction("start")}>
                   Start focus
@@ -432,7 +441,7 @@ export function RoomClient({ code }: { code: string }) {
               {room.started_at && (
                 <>
                   <Button size="sm" variant="secondary" onClick={() => timerAction(room.is_paused ? "resume" : "pause")}>
-                    {room.is_paused ? "Resume" : "Pause"}
+                    {room.is_paused ? "Resume timer" : "Pause timer"}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => timerAction("reset")}>
                     Reset
@@ -441,52 +450,94 @@ export function RoomClient({ code }: { code: string }) {
               )}
             </div>
           )}
-        </div>
-
-        {!recapReady && (
-          <div className="flex flex-col items-center gap-2 rounded-2xl border border-line bg-night-soft/60 py-8">
-            <Timer room={room} />
-            <p className="text-xs text-muted">
-              {room.state === "waiting"
-                ? "Waiting for the host to start the focus timer."
-                : room.is_paused
-                  ? "Paused — perfect moment for a Shared Spark."
-                  : "Everyone sees the same clock, straight from the server."}
-            </p>
-          </div>
-        )}
+        </header>
 
         {recapReady ? (
-          <Recap
-            room={room}
-            durationSec={Math.max(0, room.duration_sec - remainingSeconds(room))}
-            participantCount={participants.length}
-            challengesCompleted={challengesCompleted}
-            finalAnswer={conclusion?.final_answer ?? null}
-            explanation={conclusion?.ai_explanation ?? null}
-          />
-        ) : (
-          <>
-            <ChallengePanel
+          <div className="flex flex-1 items-start justify-center py-4 sm:py-8">
+            <Recap
               room={room}
-              challenge={lastChallenge}
-              submissions={submissions}
-              conclusion={conclusion}
-              participants={participants}
-              myToken={token}
-              isHost={isHost}
-              explanationLoading={explanationLoading}
-              onLaunchSpark={launchSpark}
-              onSubmitAnswer={submitAnswer}
-              onSubmitGroupAnswer={submitGroupAnswer}
-              onAdvance={advance}
+              durationSec={Math.max(0, room.duration_sec - remainingSeconds(room))}
+              participantCount={participants.length}
+              challengesCompleted={challengesCompleted}
+              finalAnswer={conclusion?.final_answer ?? null}
+              explanation={conclusion?.ai_explanation ?? null}
             />
-            <VoicePanel />
-            <ChatPanel messages={messages} myToken={token} onSend={sendChat} />
-          </>
-        )}
+          </div>
+        ) : (
+          <div className="grid min-w-0 flex-1 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
+            <section className="flex min-w-0 flex-col gap-5">
+              <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface via-night-soft to-night-soft px-5 py-6 shadow-[0_20px_70px_rgba(0,0,0,0.18)] sm:px-8 sm:py-7">
+                <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-ember/10 blur-3xl" />
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="max-w-sm">
+                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-ember">
+                      <Flame className="h-4 w-4" aria-hidden /> Focus session
+                    </p>
+                    <h2 className="mt-2 text-lg font-bold tracking-tight sm:text-xl">
+                      {room.state === "waiting" ? "Ready when you are" : room.is_paused ? "Take a breath" : "Stay with the moment"}
+                    </h2>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                      {room.state === "waiting"
+                        ? "Your shared space is ready. The host can start the focus timer when everyone is settled."
+                        : room.is_paused
+                          ? "The clock is paused. This is a good moment to reflect or kindle a Shared Spark."
+                          : "Everyone shares the same clock. Keep the conversation focused and build something together."}
+                    </p>
+                  </div>
+                  <div className="flex min-w-[180px] items-center justify-center rounded-2xl border border-line/80 bg-night/60 px-6 py-4 sm:min-w-[220px]">
+                    <Timer room={room} />
+                  </div>
+                </div>
+              </div>
 
-        <FieldError>{error}</FieldError>
+              <div className="flex items-center justify-between gap-3 px-1">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Team workspace</p>
+                  <h2 className="mt-1 text-lg font-bold tracking-tight">The Shared Spark</h2>
+                </div>
+                <span className="hidden rounded-full border border-line bg-night-soft px-3 py-1.5 text-xs text-muted sm:inline-flex">
+                  {participants.length} {participants.length === 1 ? "person" : "people"} in the room
+                </span>
+              </div>
+
+              <ChallengePanel
+                room={room}
+                challenge={lastChallenge}
+                submissions={submissions}
+                conclusion={conclusion}
+                participants={participants}
+                myToken={token}
+                isHost={isHost}
+                explanationLoading={explanationLoading}
+                onLaunchSpark={launchSpark}
+                onSubmitAnswer={submitAnswer}
+                onSubmitGroupAnswer={submitGroupAnswer}
+                onAdvance={advance}
+              />
+              <FieldError>{error}</FieldError>
+            </section>
+
+            <aside className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:sticky xl:top-5 xl:flex xl:flex-col">
+              <div className="min-w-0 rounded-2xl border border-line bg-surface/70 p-4 shadow-sm sm:col-span-2 xl:col-span-1">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">Stay connected</p>
+                    <h2 className="mt-1 text-base font-bold">Room chat</h2>
+                  </div>
+                  <span className="rounded-full border border-line bg-night-soft px-2.5 py-1 text-[10px] font-medium text-muted">Live</span>
+                </div>
+                <ChatPanel messages={messages} myToken={token} onSend={sendChat} />
+              </div>
+              <div className="min-w-0 rounded-2xl border border-line bg-surface/70 p-4 shadow-sm sm:col-span-2 xl:col-span-1">
+                <div className="mb-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">Speak your thoughts</p>
+                  <h2 className="mt-1 text-base font-bold">Voice studio</h2>
+                </div>
+                <VoicePanel />
+              </div>
+            </aside>
+          </div>
+        )}
       </main>
     </div>
   );

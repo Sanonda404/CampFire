@@ -47,9 +47,9 @@ export function ChatPanel({
   }
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col" aria-label="Room chat">
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted">Firelight chatter</h2>
-      <div className="scroll-thin flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-line bg-night-soft/70 p-3">
+    <section className="flex min-h-0 flex-col" aria-label="Room chat">
+      
+      <div className="scroll-thin flex h-56 min-h-32 flex-col gap-3 overflow-y-auto rounded-xl border border-line/80 bg-night/60 p-3 sm:h-64 xl:h-72">
         {messages.length === 0 && (
           <p className="my-auto text-center text-xs text-muted/70">
             No messages yet — say hello when you arrive.
@@ -76,11 +76,11 @@ export function ChatPanel({
         ))}
         <div ref={endRef} />
       </div>
-      <form onSubmit={submit} className="mt-2 flex gap-2">
+      <form onSubmit={submit} className="mt-3 flex gap-2">
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Add to the conversation…"
+          placeholder="Write a message…"
           maxLength={500}
           aria-label="Chat message"
         />

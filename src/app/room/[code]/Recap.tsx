@@ -26,27 +26,27 @@ export function Recap({
   const router = useRouter();
 
   return (
-    <Card className="mx-auto flex w-full max-w-xl flex-col gap-6 py-10 text-center">
+    <Card className="mx-auto flex w-full max-w-2xl flex-col gap-7 rounded-3xl border border-line bg-gradient-to-br from-surface to-night-soft p-5 text-center shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-9">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-ember">Session complete</p>
-        <h1 className="mt-2 text-2xl font-extrabold tracking-tight">{room.name} — recap</h1>
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-ember">Session complete</p>
+        <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">{room.name} — recap</h1>
         <p className="mt-1 text-sm text-muted">{activityLabel(room.activity_type)}</p>
       </div>
 
       <dl className="grid grid-cols-3 gap-3 text-center">
-        <div className="rounded-xl border border-line bg-night-soft p-3">
+        <div className="rounded-2xl border border-line bg-night/60 p-4">
           <dt className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest text-muted">
             <TimerIcon className="h-3 w-3" aria-hidden /> Focus
           </dt>
           <dd className="mt-1 font-mono text-lg font-bold">{formatSeconds(durationSec)}</dd>
         </div>
-        <div className="rounded-xl border border-line bg-night-soft p-3">
+        <div className="rounded-2xl border border-line bg-night/60 p-4">
           <dt className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest text-muted">
             <Users className="h-3 w-3" aria-hidden /> Friends
           </dt>
           <dd className="mt-1 font-mono text-lg font-bold">{participantCount}</dd>
         </div>
-        <div className="rounded-xl border border-line bg-night-soft p-3">
+        <div className="rounded-2xl border border-line bg-night/60 p-4">
           <dt className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-widest text-muted">
             <Sparkles className="h-3 w-3" aria-hidden /> Sparks
           </dt>

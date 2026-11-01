@@ -141,11 +141,11 @@ export function VoicePanel() {
 
   return (
     <section
-      className="flex flex-col gap-3 rounded-2xl border border-line bg-night-soft/60 p-4"
+      className="flex flex-col gap-3"
       aria-label="Voice mode"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Voice</h2>
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Voice</h2>
         <div
           role="radiogroup"
           aria-label="Voice mode"

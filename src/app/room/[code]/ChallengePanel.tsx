@@ -48,7 +48,7 @@ export function ChallengePanel(p: Props) {
 
   if (p.room.state === "focusing" || p.room.state === "waiting") {
     return (
-      <Card className="flex flex-col items-center gap-3 py-10 text-center">
+      <Card className="relative flex flex-col items-center gap-4 overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface to-night-soft px-5 py-12 text-center shadow-sm sm:px-8">
         <Sparkles className="h-7 w-7 text-ember" aria-hidden />
         <h2 className="text-lg font-bold">Shared Spark</h2>
             <p className="max-w-sm text-sm text-muted">
@@ -76,9 +76,9 @@ export function ChallengePanel(p: Props) {
   }
 
   return (
-    <Card className="flex flex-col gap-5">
+    <Card className="flex flex-col gap-6 rounded-3xl border border-line bg-surface/70 p-5 shadow-sm sm:p-7">
       <div>
-        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-ember">
+        <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-ember">
           <Sparkles className="h-4 w-4" aria-hidden /> Shared Spark
           {p.challenge.ai_generated ? (
             <span className="text-muted/70 normal-case">· AI-kindled</span>
@@ -86,14 +86,14 @@ export function ChallengePanel(p: Props) {
             <span className="text-muted/70 normal-case">· from the campfire deck (AI unavailable)</span>
           )}
         </p>
-        <h2 className="mt-2 text-lg font-bold leading-snug">{p.challenge.question}</h2>
+        <h2 className="mt-3 text-xl font-extrabold leading-snug tracking-tight sm:text-2xl">{p.challenge.question}</h2>
         {p.challenge.context && <p className="mt-1.5 text-sm text-muted">{p.challenge.context}</p>}
       </div>
 
       {(p.room.state === "challenge_thinking" || p.room.state === "challenge_sharing") && (
         <div className="flex flex-col gap-4">
           {mySubmission ? (
-            <div className="flex items-center gap-2 rounded-xl border border-line bg-night-soft px-4 py-3 text-sm text-muted">
+            <div className="flex items-center gap-3 rounded-2xl border border-lilac/20 bg-lilac/5 px-4 py-4 text-sm leading-relaxed text-muted">
               <Lock className="h-4 w-4 text-lilac" aria-hidden />
               Your answer is sealed. It stays hidden until the host reveals everyone’s at once.
             </div>
@@ -149,7 +149,7 @@ export function ChallengePanel(p: Props) {
           )}
           <ul className="scroll-thin -mr-1 flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
             {p.submissions.map((s) => (
-              <li key={s.id} className="flex gap-3 rounded-xl border border-line bg-night-soft p-3">
+              <li key={s.id} className="flex gap-3 rounded-2xl border border-line bg-night-soft/80 p-4 transition-colors hover:border-line/80">
                 <Avatar token={s.participant_token} name={nameByToken.get(s.participant_token) ?? "?"} size="sm" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">{nameByToken.get(s.participant_token) ?? "Someone"}</p>
@@ -189,8 +189,8 @@ export function ChallengePanel(p: Props) {
       {p.room.state === "group_answer" && (
         <div className="flex flex-col gap-3">
           {p.conclusion ? (
-            <div className="rounded-xl border border-ember/40 bg-ember/10 p-4">
-              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-ember">
+            <div className="rounded-2xl border border-ember/30 bg-ember/[0.07] p-5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-ember">
                 <Users className="h-3.5 w-3.5" aria-hidden /> The room’s answer
               </p>
               <p className="mt-2 text-sm">{p.conclusion.final_answer}</p>

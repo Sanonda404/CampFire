@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geminiConfigured, polishText } from "@/lib/voice";
 
-export const runtime = "nodejs";
-
 export async function POST(req: NextRequest) {
   if (!geminiConfigured()) {
     return NextResponse.json({ error: "Polishing is not configured (missing GEMINI_API_KEY)." }, { status: 503 });

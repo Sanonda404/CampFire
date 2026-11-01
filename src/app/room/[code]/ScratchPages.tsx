@@ -18,45 +18,8 @@ export function ScratchPages({
   onUpdate: (id: string, patch: { title?: string; content?: string }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
-  const [activeId, setActiveId] = useState<string | null>(pages[0]?.id ?? null);
-  const [saving, setSaving] = useState(false);
-  const lastSavedRef = useRef<Record<string, { title: string; content: string }>>({});
-
-  useEffect(() => {
-    if (activeId && !pages.some((p) => p.id === activeId)) {
-      setActiveId(pages[0]?.id ?? null);
-    }
-    if (!activeId && pages.length > 0) setActiveId(pages[0].id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pages.length]);
-
-  const active = pages.find((p) => p.id === activeId) ?? null;
-  const [titleDraft, setTitleDraft] = useState(active?.title ?? "");
-  const [contentDraft, setContentDraft] = useState(active?.content ?? "");
-
-  useEffect(() => {
-    setTitleDraft(active?.title ?? "");
-    setContentDraft(active?.content ?? "");
-    lastSavedRef.current[active?.id ?? ""] = { title: active?.title ?? "", content: active?.content ?? "" };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId]);
-
-  useEffect(() => {
-    if (!active) return;
-    const last = lastSavedRef.current[active.id];
-    if (!last || (titleDraft === last.title && contentDraft === last.content)) return;
-    const t = setTimeout(async () => {
-      setSaving(true);
-      try {
-        await onUpdate(active.id, { title: titleDraft, content: contentDraft });
-        lastSavedRef.current[active.id] = { title: titleDraft, content: contentDraft };
-      } finally {
-        setSaving(false);
-      }
-    }, 800);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleDraft, contentDraft, activeId]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const active = pages.find((p) => p.id === selectedId) ?? pages[0] ?? null;
 
   return (
     <Card className="flex min-h-0 flex-col gap-3 p-4">
@@ -64,7 +27,7 @@ export function ScratchPages({
         <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Scratch pages</h2>
         <button
           type="button"
-          onClick={() => void onCreate().then((id) => id && setActiveId(id))}
+          onClick={() => void onCreate().then((id) => id && setSelectedId(id))}
           className="flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-[10px] uppercase tracking-widest text-muted transition-opacity hover:opacity-85 cursor-pointer"
           aria-label="New scratch page"
         >
@@ -78,10 +41,10 @@ export function ScratchPages({
             <li key={p.id} className="flex items-center">
               <button
                 type="button"
-                onClick={() => setActiveId(p.id)}
+                onClick={() => setSelectedId(p.id)}
                 className={
                   "max-w-36 truncate rounded-l-lg px-2 py-1 text-xs cursor-pointer " +
-                  (p.id === activeId
+                  (p.id === active?.id
                     ? "bg-ember/90 text-night"
                     : "border border-line bg-night-soft text-muted")
                 }
@@ -92,7 +55,7 @@ export function ScratchPages({
                 <button
                   type="button"
                   onClick={() => {
-                    if (p.id === activeId) setActiveId(null);
+                    if (p.id === active?.id) setSelectedId(null);
                     void onDelete(p.id);
                   }}
                   className="rounded-r-lg border border-l-0 border-line bg-night-soft px-1.5 py-1 text-muted transition-opacity hover:opacity-70 cursor-pointer"
@@ -107,33 +70,68 @@ export function ScratchPages({
       )}
 
       {active ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <input
-            value={titleDraft}
-            onChange={(e) => setTitleDraft(e.target.value)}
-            maxLength={80}
-            placeholder="Page title"
-            className="w-full rounded-xl border border-line bg-night-soft px-3 py-2 text-sm font-semibold text-cream placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-ember/60"
-            aria-label="Scratch page title"
-          />
-          <textarea
-            value={contentDraft}
-            onChange={(e) => setContentDraft(e.target.value)}
-            rows={8}
-            maxLength={8000}
-            placeholder="Notes, risks, half-formed thoughts — visible to your whole team."
-            className="w-full flex-1 resize-none rounded-xl border border-line bg-night-soft p-3 text-sm text-cream placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-ember/60"
-            aria-label="Scratch page content"
-          />
-          <p className="text-[10px] text-muted/70" aria-live="polite">
-            {saving ? "Saving…" : "Autosaves — shared with your team"}
-          </p>
-        </div>
+        <PageEditor
+          key={active.id}
+          page={active}
+          onUpdate={onUpdate}
+        />
       ) : (
         <p className="text-xs text-muted/70">
           Create a scratch page to think out loud with your team.
         </p>
       )}
     </Card>
+  );
+}
+
+function PageEditor({
+  page,
+  onUpdate,
+}: {
+  page: ScratchPage;
+  onUpdate: (id: string, patch: { title?: string; content?: string }) => Promise<void>;
+}) {
+  const [titleDraft, setTitleDraft] = useState(page.title);
+  const [contentDraft, setContentDraft] = useState(page.content);
+  const [saving, setSaving] = useState(false);
+  const lastSavedRef = useRef({ title: page.title, content: page.content });
+
+  useEffect(() => {
+    if (titleDraft === lastSavedRef.current.title && contentDraft === lastSavedRef.current.content) return;
+    const t = setTimeout(async () => {
+      setSaving(true);
+      try {
+        await onUpdate(page.id, { title: titleDraft, content: contentDraft });
+        lastSavedRef.current = { title: titleDraft, content: contentDraft };
+      } finally {
+        setSaving(false);
+      }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [titleDraft, contentDraft, page.id, onUpdate]);
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <input
+        value={titleDraft}
+        onChange={(e) => setTitleDraft(e.target.value)}
+        maxLength={80}
+        placeholder="Page title"
+        className="w-full rounded-xl border border-line bg-night-soft px-3 py-2 text-sm font-semibold text-cream placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-ember/60"
+        aria-label="Scratch page title"
+      />
+      <textarea
+        value={contentDraft}
+        onChange={(e) => setContentDraft(e.target.value)}
+        rows={8}
+        maxLength={8000}
+        placeholder="Notes, risks, half-formed thoughts — visible to your whole team."
+        className="w-full flex-1 resize-none rounded-xl border border-line bg-night-soft p-3 text-sm text-cream placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-ember/60"
+        aria-label="Scratch page content"
+      />
+      <p className="text-[10px] text-muted/70" aria-live="polite">
+        {saving ? "Saving…" : "Autosaves — shared with your team"}
+      </p>
+    </div>
   );
 }

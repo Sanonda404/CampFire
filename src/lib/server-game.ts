@@ -126,7 +126,8 @@ export async function runJudging(ctx: RoomContext): Promise<JudgingOutcome> {
     return { ok: false, results: [], error: "NO_PROPOSALS" };
   }
 
-  const { data: proposals } = await admin
+  const model = process.env.AI_MODEL || "gpt-4o-mini";
+  const results: JudgingResult[] = [];
 
   for (const p of list) {
     const { data: existingResult } = await admin

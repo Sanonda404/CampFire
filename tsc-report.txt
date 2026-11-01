@@ -1,0 +1,4 @@
+[96msrc/app/layout.tsx[0m:[93m21[0m:[93m50[0m - [91merror[0m[90m TS2304: [0mCannot find name 'LayoutProps'.
+
+[7m21[0m export default function RootLayout({ children }: LayoutProps<"/">) {
+[7m  [0m [91m                                                 ~~~~~~~~~~~[0m

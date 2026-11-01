@@ -18,16 +18,14 @@ export function VoiceMessage({
   onSent: () => void;
 }) {
   const [stage, setStage] = useState<Stage>("idle");
-  const [clientId, setClientId] = useState(() => crypto.randomUUID());
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [clientId, setClientId] = useState(() => crypto.randomUUID());
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const startedAtRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const teamIdRef = useRef(teamId);
-  teamIdRef.current = teamId;
 
   useEffect(
     () => () => {
@@ -41,48 +39,15 @@ export function VoiceMessage({
     if (recorderRef.current?.state === "recording") recorderRef.current.stop();
   }, []);
 
-  const start = useCallback(async () => {
-    setError(null);
-    setSeconds(0);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      recorderRef.current = recorder;
-      chunksRef.current = [];
-      startedAtRef.current = Date.now();
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-      recorder.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        if (timerRef.current) clearInterval(timerRef.current);
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        void send(blob);
-      };
-
-      recorder.start();
-      setStage("recording");
-      timerRef.current = setInterval(() => {
-        setSeconds(Math.floor((Date.now() - startedAtRef.current) / 1000));
-        if (Date.now() - startedAtRef.current >= 120_000) stop();
-      }, 250);
-    } catch {
-      setError("Microphone unavailable.");
-      setStage("error");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stop]);
-
   const send = useCallback(
-    async (blob: Blob) => {
+    async (blob: Blob, usedClientId: string) => {
       setStage("sending");
       const durationMs = Math.max(1, Date.now() - startedAtRef.current);
       try {
         const form = new FormData();
         form.append("roomId", roomId);
-        form.append("teamId", teamIdRef.current);
-        form.append("clientId", clientId);
+        form.append("teamId", teamId);
+        form.append("clientId", usedClientId);
         form.append("durationMs", String(durationMs));
         form.append("audio", blob, "voice.webm");
         const res = await fetch("/api/voice/finalize", {
@@ -102,14 +67,46 @@ export function VoiceMessage({
         setStage("error");
       }
     },
-    [roomId, clientId, onSent]
+    [roomId, teamId, onSent]
   );
+
+  const start = useCallback(async () => {
+    setError(null);
+    setSeconds(0);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      recorderRef.current = recorder;
+      chunksRef.current = [];
+      startedAtRef.current = Date.now();
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        if (timerRef.current) clearInterval(timerRef.current);
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        void send(blob, clientId);
+      };
+
+      recorder.start();
+      setStage("recording");
+      timerRef.current = setInterval(() => {
+        setSeconds(Math.floor((Date.now() - startedAtRef.current) / 1000));
+        if (Date.now() - startedAtRef.current >= 120_000) stop();
+      }, 250);
+    } catch {
+      setError("Microphone unavailable.");
+      setStage("error");
+    }
+  }, [stop, send, clientId]);
 
   return (
     <div className="flex flex-col items-end gap-1">
       <button
         type="button"
-        onClick={stage === "recording" ? stop : start}
+        onClick={stage === "recording" ? stop : () => void start()}
         disabled={stage === "sending"}
         className={cn(
           "shrink-0 rounded-xl px-3 py-2 transition-opacity hover:opacity-85 disabled:opacity-40 cursor-pointer",
@@ -128,7 +125,7 @@ export function VoiceMessage({
   );
 }
 
-export function VoicePlayback({ roomId, path }: { roomId: string; path: string }) {
+export function VoicePlayback({ path }: { path: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

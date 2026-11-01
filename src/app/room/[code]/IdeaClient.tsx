@@ -540,7 +540,7 @@ export function IdeaClient({ code }: { code: string }) {
       ? members.some((m) => m.team_id === myTeam.id && m.participant_id === i.participant_id)
       : i.participant_id === myParticipantId
   );
-  const teamMessages = messages.filter((m) => myTeam && m.team_id === myTeam.team_id);
+  const teamMessages = messages.filter((m) => myTeam && m.team_id === myTeam.id);
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-5xl flex-col gap-4 p-4 pb-10">

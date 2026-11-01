@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const audio = await synthesizeSpeech(text);
-    return new NextResponse(audio, {
+    return new NextResponse(new Uint8Array(audio), {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "no-store",

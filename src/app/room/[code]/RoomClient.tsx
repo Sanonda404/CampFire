@@ -6,6 +6,7 @@ import { Flame } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { ChatPanel } from "./ChatPanel";
 import { ChallengePanel } from "./ChallengePanel";
+import { VoicePanel } from "./VoicePanel";
 import { Recap } from "./Recap";
 import { PhaseIndicator } from "@/components/ui/PhaseIndicator";
 import { Timer } from "@/components/ui/Timer";
@@ -446,6 +447,7 @@ export function RoomClient({ code }: { code: string }) {
               onSubmitGroupAnswer={submitGroupAnswer}
               onAdvance={advance}
             />
+            <VoicePanel />
             <ChatPanel messages={messages} myToken={token} onSend={sendChat} />
           </>
         )}

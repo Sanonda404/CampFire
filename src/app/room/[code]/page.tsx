@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { RoomClient } from "./RoomClient";
+import { IdeaClient } from "./IdeaClient";
 
 export default function RoomPage({ params }: { params: Promise<{ code: string }> }) {
   return (
@@ -11,5 +11,5 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
 
 async function RoomPageContent({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  return <RoomClient code={code.toUpperCase()} />;
+  return <IdeaClient code={code.toUpperCase()} />;
 }

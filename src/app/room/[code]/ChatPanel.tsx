@@ -49,7 +49,7 @@ export function ChatPanel({
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label="Room chat">
       <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted">Firelight chatter</h2>
-      <div className="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-line bg-night-soft/70 p-3">
+      <div className="scroll-thin flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-line bg-night-soft/70 p-3">
         {messages.length === 0 && (
           <p className="my-auto text-center text-xs text-muted/70">
             No messages yet — say hello when you arrive.

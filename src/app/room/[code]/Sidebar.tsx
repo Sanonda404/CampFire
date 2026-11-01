@@ -70,7 +70,7 @@ export function Sidebar({
         <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted">
           <Users className="h-3.5 w-3.5" aria-hidden /> Around the fire ({participants.length})
         </p>
-        <ul className="flex flex-col gap-2">
+        <ul className="scroll-thin -mr-1 flex max-h-56 flex-col gap-2 overflow-y-auto pr-1">
           {participants.map((p) => {
             const online = now > 0 && now - new Date(p.last_seen_at).getTime() < 70_000;
             return (

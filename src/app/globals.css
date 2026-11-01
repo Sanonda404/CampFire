@@ -24,6 +24,30 @@ body {
   background: rgba(255, 146, 46, 0.35);
 }
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-lilac) 40%, transparent) transparent;
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-lilac) 40%, transparent) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-lilac) 35%, transparent);
+  border-radius: 9999px;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-lilac) 55%, transparent);
+}
+
 @keyframes flicker {
   0%, 100% { opacity: 1; }
   42% { opacity: 0.85; }

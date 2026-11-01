@@ -490,14 +490,6 @@ export function RoomClient({ code }: { code: string }) {
   );
 }
 
-function CenterMessage({ text }: { text: string }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center text-sm text-muted">
-      {text}
-    </div>
-  );
-}
-
 function CenterCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center p-5">

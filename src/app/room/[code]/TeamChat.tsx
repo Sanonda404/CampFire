@@ -78,7 +78,7 @@ export function TeamChat({
             >
               {m.message_type === "voice" && m.audio_storage_path ? (
                 <span className="flex flex-col items-start">
-                  <VoicePlayback roomId={roomId} path={m.audio_storage_path} />
+                  <VoicePlayback path={m.audio_storage_path} />
                   {m.transcript && <span className="mt-1 text-xs italic">{m.transcript}</span>}
                 </span>
               ) : (

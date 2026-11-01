@@ -57,6 +57,13 @@ export function IdeaClient({ code }: { code: string }) {
 
   const roomIdRef = useRef<string | null>(null);
   const lastBoundaryRef = useRef<number | null>(null);
+  const lastTickRef = useRef(0);
+  const myTeamIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    myTeamIdRef.current =
+      teams.find((t) => t.id === members.find((m) => m.participant_id === myParticipantId)?.team_id)?.id ??
+      null;
+  }, [teams, members, myParticipantId]);
 
   const applyRoom = useCallback((r: Room | null) => {
     if (r) roomIdRef.current = r.id;
@@ -204,8 +211,7 @@ export function IdeaClient({ code }: { code: string }) {
         { event: "INSERT", schema: "public", table: "chat_messages", filter: `room_id=eq.${roomId}` },
         (payload) => {
           const m = payload.new as ChatMessage;
-          const myTeam = members.find((mm) => mm.participant_id === myParticipantId);
-          if (!m.team_id || (myTeam && m.team_id === myTeam.team_id)) {
+          if (!m.team_id || m.team_id === myTeamIdRef.current) {
             setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
           }
         }
@@ -303,7 +309,9 @@ export function IdeaClient({ code }: { code: string }) {
     const boundary = nextBoundary(elapsed)?.at ?? null;
     const crossed = boundary !== null && lastBoundaryRef.current !== null && boundary !== lastBoundaryRef.current;
     lastBoundaryRef.current = boundary;
-    if (!crossed && elapsed < 180) return;
+    const due = elapsed - lastTickRef.current >= 15;
+    if (!crossed && !due) return;
+    lastTickRef.current = elapsed;
 
     void fetch("/api/game/tick", {
       method: "POST",
@@ -348,8 +356,7 @@ export function IdeaClient({ code }: { code: string }) {
 
   const myTeam = teams.find((t) => t.id === members.find((m) => m.participant_id === myParticipantId)?.team_id) ?? null;
   const phase = room?.game_started_at ? phaseAt(gameElapsed(room.game_started_at, serverNow())) : "lobby";
-  const gameLocked =
-    !!challenge && ["judging", "reveal", "agreed", "completed"].includes(challenge.status);
+  const gameLocked = !!challenge && ["judging", "reveal", "agreed", "completed"].includes(challenge.status);
   const showResults =
     !!challenge && (gameLocked || room?.state === "complete" || room?.winning_team_id !== null);
 

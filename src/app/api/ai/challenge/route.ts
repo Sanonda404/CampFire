@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { aiConfigured, callAI } from "@/lib/ai";
 import { PREDEFINED_CHALLENGES, FALLBACK_CHALLENGE, activityLabel } from "@/lib/activities";
+import { CHALLENGE_GENERATE_PROMPT } from "@/lib/data";
 
 function pickPredefined(activity: string) {
   const pool = PREDEFINED_CHALLENGES[activity] ?? [];
@@ -38,8 +39,7 @@ export async function POST(req: NextRequest) {
       const text = await callAI([
         {
           role: "system",
-          content:
-            "You write short, thoughtful group challenges for a co-working session. Reply in exactly two lines: first line is the challenge question (max 140 chars), second line starts with 'Context: ' and gives one sentence of guidance (max 120 chars). No other text.",
+          content: CHALLENGE_GENERATE_PROMPT,
         },
         {
           role: "user",
@@ -48,10 +48,32 @@ export async function POST(req: NextRequest) {
           } Write one fresh challenge for the group.`,
         },
       ]);
-      const [qLine, cLine] = text.split("\n").filter(Boolean);
-      question = (qLine ?? "").replace(/^question:\s*/i, "").trim();
-      context = (cLine ?? "").replace(/^context:\s*/i, "").trim();
-      aiGenerated = question.length > 5;
+
+      const lines = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      const [qLine, cLine] = lines;
+
+      const parsedQuestion = (qLine ?? "")
+        .replace(/^question:\s*/i, "")
+        .trim();
+
+      const parsedContext = (cLine ?? "")
+        .replace(/^context:\s*/i, "")
+        .trim();
+
+      if (
+        parsedQuestion.length > 5 &&
+        /^context:\s*/i.test(cLine ?? "") &&
+        parsedContext.length > 0 &&
+        lines.length === 2
+      ) {
+        question = parsedQuestion;
+        context = parsedContext;
+        aiGenerated = true;
+      }
     } catch {
       aiGenerated = false;
     }

@@ -115,7 +115,6 @@ export function TeamChat({
         <VoiceMessage
           roomId={roomId}
           teamId={teamId}
-          clientId={clientIdRef.current}
           onSent={onRefresh}
         />
       </div>

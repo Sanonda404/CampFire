@@ -64,6 +64,10 @@ export function IdeaClient({ code }: { code: string }) {
       teams.find((t) => t.id === members.find((m) => m.participant_id === myParticipantId)?.team_id)?.id ??
       null;
   }, [teams, members, myParticipantId]);
+  const cidRef = useRef<string | null>(null);
+  useEffect(() => {
+    cidRef.current = room?.current_challenge_id ?? null;
+  }, [room?.current_challenge_id]);
 
   const applyRoom = useCallback((r: Room | null) => {
     if (r) roomIdRef.current = r.id;
@@ -179,12 +183,22 @@ export function IdeaClient({ code }: { code: string }) {
     void loadAll();
   }, [screen, loadAll]);
 
+  // When the reveal flips the challenge out of 'thinking', team ideas become readable
+  // under RLS — refetch once so the list fills even if no realtime event arrives.
+  useEffect(() => {
+    if (screen !== "ready") return;
+    const cid = challenge?.id;
+    if (!cid || challenge?.status === "thinking") return;
+    void supabaseOf().from("initial_ideas").select("*").eq("challenge_id", cid)
+      .then(({ data }) => setIdeas((data ?? []) as InitialIdea[]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, challenge?.id, challenge?.status]);
+
   // ---------- realtime ----------
   useEffect(() => {
     if (screen !== "ready" || !room) return;
     const supabase = supabaseOf();
     const roomId = room.id;
-    const cid = room.current_challenge_id;
 
     const channel = supabase
       .channel(`clash-${roomId}`)
@@ -228,8 +242,8 @@ export function IdeaClient({ code }: { code: string }) {
         "postgres_changes",
         { event: "*", schema: "public", table: "initial_ideas", filter: `room_id=eq.${roomId}` },
         () => {
-          if (!cid) return;
-          void supabase.from("initial_ideas").select("*").eq("challenge_id", cid)
+          if (!cidRef.current) return;
+          void supabase.from("initial_ideas").select("*").eq("challenge_id", cidRef.current)
             .then(({ data }) => setIdeas((data ?? []) as InitialIdea[]));
         }
       )
@@ -237,8 +251,8 @@ export function IdeaClient({ code }: { code: string }) {
         "postgres_changes",
         { event: "*", schema: "public", table: "scratch_pages", filter: `room_id=eq.${roomId}` },
         () => {
-          if (!cid) return;
-          void supabase.from("scratch_pages").select("*").eq("challenge_id", cid).order("created_at")
+          if (!cidRef.current) return;
+          void supabase.from("scratch_pages").select("*").eq("challenge_id", cidRef.current).order("created_at")
             .then(({ data }) => setPages((data ?? []) as ScratchPage[]));
         }
       )
@@ -246,8 +260,8 @@ export function IdeaClient({ code }: { code: string }) {
         "postgres_changes",
         { event: "*", schema: "public", table: "team_proposals", filter: `room_id=eq.${roomId}` },
         () => {
-          if (!cid) return;
-          void supabase.from("team_proposals").select("*").eq("challenge_id", cid)
+          if (!cidRef.current) return;
+          void supabase.from("team_proposals").select("*").eq("challenge_id", cidRef.current)
             .then(({ data }) => {
               const list = (data ?? []) as TeamProposal[];
               setAllProposals(list);
@@ -259,8 +273,8 @@ export function IdeaClient({ code }: { code: string }) {
         "postgres_changes",
         { event: "*", schema: "public", table: "judging_results", filter: `room_id=eq.${roomId}` },
         () => {
-          if (!cid) return;
-          void supabase.from("judging_results").select("*").eq("challenge_id", cid)
+          if (!cidRef.current) return;
+          void supabase.from("judging_results").select("*").eq("challenge_id", cidRef.current)
             .then(({ data }) => setResults((data ?? []) as JudgingResult[]));
         }
       )

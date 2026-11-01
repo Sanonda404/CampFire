@@ -27,11 +27,6 @@ export function TeamChat({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
-  const clientIdRef = useRef<string>("");
-
-  useEffect(() => {
-    clientIdRef.current = crypto.randomUUID();
-  }, [teamId]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { groqConfigured, transcribeAudio } from "@/lib/voice";
 
-export const runtime = "nodejs";
-
 export async function POST(req: NextRequest) {
   if (!groqConfigured()) {
     return NextResponse.json({ error: "Speech-to-text is not configured (missing GROQ_API_KEY)." }, { status: 503 });

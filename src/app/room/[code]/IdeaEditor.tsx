@@ -6,7 +6,18 @@ import { formatSeconds } from "@/lib/utils";
 import { IDEAS_REVEAL_AT } from "@/lib/game";
 import type { Challenge, InitialIdea, Participant } from "@/lib/types";
 
-export function IdeaEditor({
+export function IdeaEditor(props: {
+  challengeStatus: Challenge["status"];
+  myIdea: InitialIdea | null;
+  teamIdeas: InitialIdea[];
+  participants: Participant[];
+  myParticipantId: string | null;
+  onSave: (content: string) => Promise<void>;
+}) {
+  return <IdeaEditorInner key={props.myIdea?.id ?? "new"} {...props} />;
+}
+
+function IdeaEditorInner({
   challengeStatus,
   myIdea,
   teamIdeas,
@@ -26,11 +37,6 @@ export function IdeaEditor({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const lastSavedRef = useRef(myIdea?.content ?? "");
-
-  useEffect(() => {
-    setDraft(myIdea?.content ?? "");
-    lastSavedRef.current = myIdea?.content ?? "";
-  }, [myIdea?.id]);
 
   useEffect(() => {
     if (!private_) return;
